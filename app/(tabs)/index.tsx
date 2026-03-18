@@ -1,98 +1,285 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useContext, useState } from "react";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { StoryNodeContext } from "../contexts";
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+	const [newNodeModalVisible, setNewNodeModalVisible] = useState(false);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+	const [titleInput, setTitleInput] = useState("");
+	const [bodyInput, setBodyInput] = useState("");
+	const [linkForms, setLinkForms] = useState([""]);
+
+	const updateRow = (index: number, value: string) => {
+		const updated = [...linkForms];
+		updated[index] = value;
+		setLinkForms(updated);
+	};
+
+	const addRow = () => {
+		setLinkForms([...linkForms, ""]);
+	};
+
+	const context = useContext(StoryNodeContext);
+	if (!context) return null;
+
+	const { storyNodes, setStoryNodes } = context;
+
+	const saveNewNode = () => {
+		// if array has elements, finds the largest and + 1 to it
+		const newId =
+			storyNodes.length > 0 ? Math.max(...storyNodes.map((n) => n.id)) + 1 : 1;
+
+		// Convert bodyInput to array of paragraphs (split by newline)
+		const bodyArray =
+			bodyInput.trim() === ""
+				? null
+				: bodyInput.split("\n").map((text, index) => ({ id: index + 1, text }));
+
+		const linkedNodes = linkForms.map((text, index) => ({
+			id: newId + index + 1, // unique ID for each new link node
+			title: text,
+			body: null,
+			links: [],
+			start: false,
+		}));
+
+		const linksArray = linkedNodes.map((node) => ({
+			id: node.id,
+			text: node.title,
+			targetId: node.id,
+		}));
+
+		const newNode = {
+			id: newId,
+			title: titleInput,
+			body: bodyArray,
+			links: linksArray,
+			start: false,
+		};
+
+		// Add new node to the array
+		setStoryNodes([...storyNodes, newNode, ...linkedNodes]);
+
+		// Close modal
+		setNewNodeModalVisible(false);
+
+		// Reset inputs
+		setTitleInput("");
+		setBodyInput("");
+		setLinkForms([""]);
+	};
+
+	return (
+		<View
+			style={{
+				flex: 1,
+				alignItems: "center",
+				margin: 10,
+			}}
+		>
+			{storyNodes.map((node) => (
+				<View
+					key={node.id}
+					style={{
+						alignSelf: "stretch",
+						backgroundColor: "white",
+						boxShadow: "0px 2px 3px rgba(0,0,0,0.05)",
+						padding: 10,
+						borderRadius: 8,
+						marginHorizontal: 5,
+						marginTop: 10,
+					}}
+				>
+					<Text
+						style={{
+							fontWeight: "bold",
+						}}
+					>
+						{node.title}
+					</Text>
+					{node.body && node.body.length > 0
+						? node.body.map((paragraph) => (
+								<Text key={paragraph.id}>{paragraph.text}</Text>
+							))
+						: ""}
+
+					<View
+						style={{
+							flexDirection: "row",
+							gap: 5,
+							marginTop: 5,
+							minHeight: 15,
+							padding: 5,
+						}}
+					>
+						{!Array.isArray(node.links) || !node.links.length ? (
+							<Text style={{ fontStyle: "italic" }}>No links...</Text>
+						) : (
+							node.links.map((link) => (
+								<View
+									key={link.id}
+									style={{
+										flex: 1,
+										alignSelf: "stretch",
+										borderWidth: 1,
+										borderColor: "black",
+										padding: 5,
+									}}
+								>
+									<Text>
+										{link.text}
+										<Text style={{ fontWeight: "bold" }}>
+											{storyNodes.find(
+												(node) => node.id === link.targetId,
+											)
+												? ""
+												: "DOESN'T LEAD ANYWHERE"}
+										</Text>
+									</Text>
+								</View>
+							))
+						)}
+					</View>
+				</View>
+			))}
+			<Text style={{ marginTop: 20 }}>
+				... This is it! You should write more of these.
+			</Text>
+
+			<Pressable
+				style={{
+					backgroundColor: "black",
+					padding: 10,
+					marginHorizontal: 5,
+					position: "absolute",
+					bottom: 5,
+					left: 5,
+					borderRadius: 4,
+					right: 5,
+				}}
+				onPress={() => setNewNodeModalVisible(true)}
+			>
+				<Text style={{ color: "white", textAlign: "center" }}>
+					Add New Story Node
+				</Text>
+			</Pressable>
+
+			<Modal visible={newNodeModalVisible} transparent={true} animationType="none">
+				<Pressable
+					style={{
+						flex: 1,
+						justifyContent: "flex-start",
+						alignItems: "stretch",
+						backgroundColor: "rgba(0,0,0,0.5)",
+					}}
+					onPress={() => setNewNodeModalVisible(false)} // close modal
+				>
+					{/* Inner content */}
+					<Pressable
+						onPress={(e) => e.stopPropagation()} // prevent closing when inner content is clicked
+						style={{
+							backgroundColor: "white",
+							padding: 20,
+							borderRadius: 8,
+							marginHorizontal: 30,
+							marginVertical: 30,
+							position: "relative",
+						}}
+					>
+						<ScrollView>
+							<Text
+								style={{
+									fontSize: 18,
+									fontWeight: "bold",
+									marginBottom: 10,
+								}}
+							>
+								Add New Story Node
+							</Text>
+
+							<View style={{ gap: 5, marginBottom: 10 }}>
+								<TextInput
+									placeholder="Title"
+									value={titleInput}
+									onChangeText={setTitleInput}
+									style={{
+										borderWidth: 1,
+										borderColor: "black",
+										padding: 5,
+									}}
+								/>
+								<TextInput
+									placeholder="Body"
+									multiline
+									numberOfLines={3}
+									value={bodyInput}
+									onChangeText={setBodyInput}
+									style={{
+										borderWidth: 1,
+										borderColor: "black",
+										padding: 5,
+									}}
+								/>
+								<Text
+									style={{
+										fontSize: 15,
+										fontWeight: "bold",
+										marginVertical: 5,
+									}}
+								>
+									Links
+								</Text>
+								{linkForms.map((link, index) => (
+									<View key={index}>
+										<TextInput
+											placeholder="Link text"
+											value={link}
+											onChangeText={(text) =>
+												updateRow(index, text)
+											}
+											style={{
+												borderWidth: 1,
+												borderColor: "black",
+												padding: 5,
+											}}
+										/>
+									</View>
+								))}
+							</View>
+
+							<Pressable
+								onPress={addRow}
+								style={{
+									padding: 5,
+									backgroundColor: "lightgrey",
+									borderWidth: 1,
+									borderColor: "grey",
+									borderRadius: 8,
+									marginBottom: 5,
+								}}
+							>
+								<Text style={{ textAlign: "center" }}>
+									+ Add another item
+								</Text>
+							</Pressable>
+						</ScrollView>
+
+						<Pressable
+							onPress={saveNewNode}
+							style={{
+								padding: 10,
+								backgroundColor: "black",
+								borderRadius: 5,
+								marginTop: 10,
+							}}
+						>
+							<Text style={{ color: "white", textAlign: "center" }}>
+								Submit
+							</Text>
+						</Pressable>
+					</Pressable>
+				</Pressable>
+			</Modal>
+		</View>
+	);
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
