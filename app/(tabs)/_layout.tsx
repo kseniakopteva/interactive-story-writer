@@ -9,7 +9,6 @@ export default function TabLayout() {
 				tabBarLabelStyle: {
 					fontSize: 16,
 					fontWeight: "bold",
-					width: "auto",
 					minWidth: "100%",
 				},
 				tabBarItemStyle: {
