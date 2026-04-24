@@ -1,6 +1,11 @@
-import { useContext, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { colors, fonts, sizes } from "@/assets/theme";
+import { useNavigation } from "expo-router";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import BasicButton from "../components/base/BasicButton";
+import BasicPanel from "../components/base/BasicPanel";
+import { TextBold, TextRegular } from "../components/base/textComponents";
+import ErrorBanner from "../components/ErrorBanner";
 import { StoryNodeContext } from "../contexts";
 
 export default function StoryScreen() {
@@ -14,55 +19,65 @@ export default function StoryScreen() {
 		setActiveNode(storyNodes.find((elem) => elem.start === true));
 	}, [storyNodes]);
 
-	const deadLinkStyles = { fontStyle: "italic", color: "#999" };
+	const navigation = useNavigation();
 
-	if (activeNode === undefined || activeNode === null)
-		return (
-			<View>
-				<Text>
-					There is no starting node. Please set it by clicking &quot;Edit&quot;
-					on any node.
-				</Text>
-			</View>
-		);
-
-	return (
-		<View>
-			<View
-				style={{
-					flexDirection: "row",
-					justifyContent: "flex-end",
-				}}
-			>
+	useLayoutEffect(() => {
+		navigation.setOptions({
+			headerRight: () => (
 				<BasicButton
 					onPress={() =>
 						setActiveNode(storyNodes.find((elem) => elem.start === true))
 					}
-					styles={{
-						margin: 10,
+					style={{
+						marginRight: 10,
 					}}
+					type="secondary"
 				>
 					Reset
 				</BasicButton>
-			</View>
-			<View
+			),
+		});
+	});
+
+	if (activeNode === undefined || activeNode === null)
+		return (
+			<ScrollView style={styles.scrollView}>
+				<ErrorBanner style={{ margin: sizes.screenMargin }}>
+					Oops! The story doesn&apos;t have a starting node. Please set it by
+					clicking <TextBold>&quot;Edit node&quot;</TextBold> on any node and
+					pressing the button{" "}
+					<TextBold>&quot;Make story start here&quot;</TextBold>.
+				</ErrorBanner>
+			</ScrollView>
+		);
+
+	return (
+		<ScrollView
+			style={{
+				flex: 1,
+				backgroundColor: colors.backgroundDark,
+			}}
+			contentContainerStyle={{
+				flexDirection: "row",
+				justifyContent: "center",
+				flex: 1,
+			}}
+		>
+			<BasicPanel
 				style={{
-					margin: 15,
-					backgroundColor: "white",
-					boxShadow: "0px 2px 3px rgba(0,0,0,0.05)",
-					padding: 10,
-					borderRadius: 8,
-					marginTop: 5,
+					flex: 1,
+					margin: sizes.screenMargin,
+					padding: 20,
 				}}
 			>
-				<Text>
+				<View>
 					{activeNode?.body?.map((paragraph) => (
-						<Text key={paragraph.id}>
+						<TextRegular key={paragraph.id}>
 							{paragraph.text}
-							{"\n\n"}
-						</Text>
+							{"\n"}
+						</TextRegular>
 					))}
-				</Text>
+				</View>
 
 				{activeNode?.links.map((link) => {
 					const isLinkDead = !storyNodes.find(
@@ -77,22 +92,31 @@ export default function StoryScreen() {
 								)
 							}
 							style={{
-								padding: 5,
+								paddingVertical: 5,
 								marginBottom: 5,
 							}}
 							disabled={isLinkDead}
 						>
-							<Text
-								style={
-									!isLinkDead ? { fontWeight: "bold" } : deadLinkStyles
-								}
-							>
+							<Text style={!isLinkDead ? styles.link : styles.deadLink}>
 								{link.text}
 							</Text>
 						</Pressable>
 					);
 				})}
-			</View>
-		</View>
+			</BasicPanel>
+		</ScrollView>
 	);
 }
+
+const styles = StyleSheet.create({
+	scrollView: {
+		backgroundColor: colors.backgroundDark,
+	},
+	link: {
+		fontFamily: fonts.fontParagraphBold,
+	},
+	deadLink: {
+		fontFamily: fonts.fontParagraph,
+		color: colors.textSubtle,
+	},
+});

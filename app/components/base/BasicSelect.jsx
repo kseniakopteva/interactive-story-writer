@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { colors, sizes } from "../../../assets/theme";
+import { TextRegular } from "./textComponents";
 
 export default function BasicSelect({
 	initialSelected = null,
 	options,
 	onSelect,
-	styles,
+	style,
 }) {
 	const [selected, setSelected] = useState(initialSelected ?? null);
 	const [isSelectVisible, setIsSelectVisible] = useState(false);
@@ -22,14 +24,17 @@ export default function BasicSelect({
 			<Pressable
 				onPress={() => setIsSelectVisible(true)}
 				style={{
-					borderWidth: 1,
+					// borderWidth: 1,
 					borderRadius: 5,
-					borderColor: "#aaa",
-					padding: 5,
-					...styles,
+					// borderColor: "#aaa",
+					backgroundColor: colors.secondary,
+					// padding: 5,
+					...style,
 				}}
 			>
-				<Text>{selected?.text || "Select an option"}</Text>
+				<TextRegular style={{ padding: 10 }}>
+					{selected?.text || "Select an option"} ▼
+				</TextRegular>
 			</Pressable>
 
 			<Modal visible={isSelectVisible} transparent animationType="fade">
@@ -52,7 +57,7 @@ export default function BasicSelect({
 						style={{
 							marginHorizontal: 20,
 							backgroundColor: "white",
-							borderRadius: 8,
+							borderRadius: sizes.borderRadius,
 							padding: 10,
 							elevation: 5,
 						}}

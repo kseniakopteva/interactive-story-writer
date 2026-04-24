@@ -1,9 +1,12 @@
 import { useContext, useState } from "react";
-import { Text, View } from "react-native";
+import { PixelRatio, View } from "react-native";
+import { colors } from "../../assets/theme";
 import BasicButton from "../components/base/BasicButton";
-import EditNodeModal from "../components/EditNodeModal";
+import BasicPanel from "../components/base/BasicPanel";
 import { StoryNodeContext } from "../contexts";
-import DeletionConfirmationModal from "./DeletionConfirmationModal";
+import { H1, H2, TextBold, TextRegular, TextSubtle } from "./base/textComponents";
+import DeletionConfirmationModal from "./modals/DeletionConfirmationModal";
+import EditNodeModal from "./modals/EditNodeModal";
 
 export default function StoryNodeListItem({ node }) {
 	const { storyNodes, setStoryNodes } = useContext(StoryNodeContext);
@@ -11,41 +14,32 @@ export default function StoryNodeListItem({ node }) {
 	const [isEditNodeModalVisible, setIsEditNodeModalVisible] = useState(false);
 	const [isDeletionModalVisible, setIsDeletionModalVisible] = useState(false);
 
-	const startNodeStyle = node.start ? { borderColor: "#aaa", borderWidth: 1 } : "";
+	const startNodeStyle = node.start
+		? { borderColor: colors.primary, borderWidth: 2, borderStyle: "dotted" }
+		: "";
 
+
+  const isLargeText = PixelRatio.getFontScale() > 1.2;
+	
 	return (
-		<View
-			style={{
-				alignSelf: "stretch",
-				backgroundColor: "white",
-				boxShadow: "0px 2px 3px rgba(0,0,0,0.05)",
-				padding: 10,
-				borderRadius: 8,
-				marginHorizontal: 10,
-				...startNodeStyle,
-			}}
-		>
+		<BasicPanel style={{ ...startNodeStyle }}>
 			<View
 				style={{
-					flexDirection: "row",
+					flexDirection: isLargeText ? 'column' : 'row',
 					alignItems: "flex-start",
 					justifyContent: "space-between",
 				}}
 			>
-				<Text
-					style={{
-						fontWeight: "bold",
-						fontSize: 18,
-					}}
-				>
-					{node.title}
-				</Text>
-				<View style={{ flexDirection: "row", gap: 5 }}>
-					<BasicButton onPress={() => setIsDeletionModalVisible(true)}>
+				<H1 style={{  flexShrink: 1, marginBottom: 10 }}>{node.title} </H1>
+				<View style={{ flexDirection: "row", gap: 5}}>
+					<BasicButton
+						type="secondary"
+						onPress={() => setIsDeletionModalVisible(true)}
+					>
 						Remove
 					</BasicButton>
 					<BasicButton
-						type="secondary"
+						type="primary"
 						onPress={() => setIsEditNodeModalVisible(true)}
 					>
 						Edit Node
@@ -53,44 +47,31 @@ export default function StoryNodeListItem({ node }) {
 				</View>
 			</View>
 			<View style={{ marginBottom: 10 }}>
-				{node.body && node.body.length > 0
-					? node.body.map((paragraph) => (
-							<Text key={paragraph.id}>{paragraph.text}</Text>
-						))
-					: ""}
+				{node.body && node.body.length > 0 ? (
+					node.body.map((paragraph) => (
+						<TextRegular key={paragraph.id}>{paragraph.text}</TextRegular>
+					))
+				) : (
+					<TextSubtle>No text...</TextSubtle>
+				)}
 			</View>
-			<View
-				style={{
-					gap: 5,
-					paddingVertical: 5,
-				}}
-			>
-				<Text
-					style={{
-						fontWeight: "bold",
-					}}
-				>
-					Links
-				</Text>
+			<View>
+				<H2>Links</H2>
 				{!Array.isArray(node.links) || !node.links.length ? (
-					<Text style={{ fontStyle: "italic", color: "#aaa" }}>
-						No links...
-					</Text>
+					<TextSubtle>No links...</TextSubtle>
 				) : (
 					node.links.map((link) => {
 						const linkTargetNode = storyNodes.find(
 							(node) => node.id === link.targetId,
 						);
 						return (
-							<View key={link.id}>
-								<Text>
-									&quot;{link.text}&quot;
-									<Text style={{ fontWeight: "bold" }}>
-										{linkTargetNode
-											? ` ▶ ${linkTargetNode.title}`
-											: "DOESN'T LEAD ANYWHERE"}
-									</Text>
-								</Text>
+							<View key={link.id} style={{ flexDirection: "row" }}>
+								<TextRegular>&quot;{link.text}&quot;</TextRegular>
+								<TextBold>
+									{linkTargetNode
+										? ` ▶ ${linkTargetNode.title}`
+										: " ▶ "}
+								</TextBold>
 							</View>
 						);
 					})
@@ -107,6 +88,6 @@ export default function StoryNodeListItem({ node }) {
 				isDeletionModalVisible={isDeletionModalVisible}
 				setIsDeletionModalVisible={setIsDeletionModalVisible}
 			></DeletionConfirmationModal>
-		</View>
+		</BasicPanel>
 	);
 }

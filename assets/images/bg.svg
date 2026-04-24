@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="25"
+   height="25"
+   viewBox="0 0 6.6145833 6.6145833"
+   version="1.1"
+   id="svg14462"
+   sodipodi:docname="bg.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview14464"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="10.618967"
+     inkscape:cx="4.2847857"
+     inkscape:cy="19.305079"
+     inkscape:window-width="1680"
+     inkscape:window-height="987"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs14459" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect14604"
+       style="opacity:1;fill:#ffffff;fill-rule:evenodd;stroke-width:1.16629;stroke-linecap:round;paint-order:markers stroke fill;stop-color:#000000"
+       d="M 0 0 L 0 2.4492188 L 22.550781 2.4492188 L 22.550781 25 L 25 25 L 25 2.4492188 L 25 0 L 22.550781 0 L 0 0 z "
+       transform="scale(0.26458333)"
+       inkscape:export-filename="C:\Users\Ksenia\Desktop\interactive-story-writer\assets\images\bg.png"
+       inkscape:export-xdpi="150"
+       inkscape:export-ydpi="150" />
+  </g>
+</svg>

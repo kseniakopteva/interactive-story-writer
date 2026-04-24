@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { Text, View } from "react-native";
-import { StoryNodeContext } from "../contexts";
-import BasicButton from "./base/BasicButton";
-import BasicModal from "./base/BasicModal";
-import BasicTextInput from "./base/BasicTextInput";
-import BasicTextarea from "./base/BasicTextarea";
+import { View } from "react-native";
+import { StoryNodeContext } from "../../contexts";
+import BasicButton from "../base/BasicButton";
+import BasicModal from "../base/BasicModal";
+import BasicTextInput from "../base/BasicTextInput";
+import BasicTextarea from "../base/BasicTextarea";
+import { H1, H2, TextError } from "../base/textComponents";
 
 export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisible }) {
 	const { storyNodes, setStoryNodes } = useContext(StoryNodeContext);
@@ -86,16 +87,12 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 	}
 
 	return (
-		<BasicModal isVisible={addNodeModalVisible} setIsVisible={setAddNodeModalVisible}>
-			<Text
-				style={{
-					fontSize: 18,
-					fontWeight: "bold",
-					marginBottom: 10,
-				}}
-			>
-				Add New Story Node
-			</Text>
+		<BasicModal
+			isVisible={addNodeModalVisible}
+			setIsVisible={setAddNodeModalVisible}
+			handleClose={() => setLinkForms([])}
+		>
+			<H1 style={{ marginBottom: 10 }}>Add New Story Node</H1>
 
 			<View style={{ gap: 5, marginBottom: 10 }}>
 				<BasicTextInput
@@ -103,21 +100,27 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 					value={titleInput}
 					onChangeText={setTitleInput}
 				/>
-				{errors.title !== "" && <Text>{errors.title}</Text>}
+				{errors.title !== "" && (
+					<TextError style={{ marginVertical: 5 }}>{errors.title}</TextError>
+				)}
 				<BasicTextarea
 					placeholder={"Body"}
 					value={bodyInput}
 					onChangeText={setBodyInput}
 				/>
-				<Text
+				<View
 					style={{
-						fontSize: 15,
-						fontWeight: "bold",
-						marginVertical: 5,
+						flexDirection: "row",
+						justifyContent: "space-between",
+						alignItems: "baseline",
+						marginVertical: 10,
 					}}
 				>
-					Links
-				</Text>
+					<H2>Links</H2>
+					<BasicButton onPress={addRow} type="secondary">
+						Add link
+					</BasicButton>
+				</View>
 				{linkForms?.map((link, index) => (
 					<View key={index}>
 						<BasicTextInput
@@ -129,11 +132,9 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 				))}
 			</View>
 
-			<BasicButton onPress={addRow} type="secondary">
-				+ Add another item
+			<BasicButton onPress={saveNewNode} style={{ marginTop: 20 }}>
+				Create Node
 			</BasicButton>
-
-			<BasicButton onPress={saveNewNode}>Submit</BasicButton>
 		</BasicModal>
 	);
 }

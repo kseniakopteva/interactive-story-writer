@@ -1,10 +1,12 @@
 import { Modal, Pressable } from "react-native";
+import { sizes } from "../../../assets/theme";
 
 export default function BasicModal({
 	isVisible,
 	setIsVisible,
 	handleClose = () => {},
 	children,
+	style,
 }) {
 	function onClose() {
 		handleClose();
@@ -18,7 +20,7 @@ export default function BasicModal({
 					flex: 1,
 					justifyContent: "flex-start",
 					alignItems: "stretch",
-					backgroundColor: "rgba(0,0,0,0.5)",
+					backgroundColor: "rgba(0, 3, 37, 0.5)",
 				}}
 				onPress={onClose} // close modal
 			>
@@ -26,11 +28,11 @@ export default function BasicModal({
 					onPress={(e) => e.stopPropagation()} // prevent closing when inner content is clicked
 					style={{
 						backgroundColor: "white",
-						padding: 20,
-						borderRadius: 8,
-						marginHorizontal: 30,
-						marginVertical: 30,
+						padding: sizes.modalPadding,
+						borderRadius: sizes.borderRadius,
+						margin: sizes.modalMargin,
 						position: "relative",
+						...style,
 					}}
 				>
 					{children}

@@ -1,7 +1,8 @@
 import { useContext } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import StoryNodeListItem from "../components/StoryNodeListItem";
 import { StoryNodeContext } from "../contexts";
+import { sizes } from "../../assets/theme";
 
 export default function StoryNodeList() {
 	const { storyNodes } = useContext(StoryNodeContext);
@@ -10,15 +11,12 @@ export default function StoryNodeList() {
 		<View
 			style={{
 				gap: 10,
-				marginTop: 10,
+				margin: sizes.screenMargin,
 			}}
 		>
 			{storyNodes.map((node) => (
 				<StoryNodeListItem key={node.id} node={node} />
 			))}
-			<Text style={{ marginTop: 20, textAlign: "center", color: "#bbb" }}>
-				You should write more of these...
-			</Text>
 		</View>
 	);
 }

@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { StoryNodeContext } from "../contexts";
-import BasicButton from "./base/BasicButton";
-import BasicModal from "./base/BasicModal";
-import BasicSelect from "./base/BasicSelect";
-import BasicTextarea from "./base/BasicTextarea";
-import BasicTextInput from "./base/BasicTextInput";
+import { StoryNodeContext } from "../../contexts";
+import BasicButton from "../base/BasicButton";
+import BasicModal from "../base/BasicModal";
+import BasicSelect from "../base/BasicSelect";
+import BasicTextarea from "../base/BasicTextarea";
+import BasicTextInput from "../base/BasicTextInput";
+import { H1, H2, TextBold, TextSubtle } from "../base/textComponents";
 
 export default function EditNodeModal({
 	node,
@@ -21,6 +22,8 @@ export default function EditNodeModal({
 		links: node.links,
 		start: node.start,
 	});
+
+	const [startPressed, setStartPressed] = useState(false);
 
 	useEffect(() => {
 		if (!isEditNodeModalVisible) return;
@@ -41,33 +44,9 @@ export default function EditNodeModal({
 		}));
 	}
 
-	// function updateNode(id) {
-	// 	const nodesWithClearedStart = input.start
-	// 		? storyNodes.map((elem) => ({
-	// 				...elem,
-	// 				start: false,
-	// 			}))
-	// 		: storyNodes;
-
-	// 	const updatedNodes = nodesWithClearedStart.map((elem) => {
-	// 		if (elem.id === id)
-	// 			return {
-	// 				id: input.id,
-	// 				title: input.title,
-	// 				body: input.body.split("\n").map((paragraph, index) => {
-	// 					return { id: index + 1, text: paragraph };
-	// 				}),
-	// 				links: input.links,
-	// 				start: input.start,
-	// 			};
-	// 		else return elem;
-	// 	});
-
-	// 	setStoryNodes(updatedNodes);
-
-	// 	setEditNodeModalVisible(false);
-	// }
 	function updateNode(id) {
+		setStartPressed(false);
+
 		const updatedNodes = storyNodes.map((elem) => ({
 			...elem,
 			start: elem.id === id ? input.start : false,
@@ -76,7 +55,6 @@ export default function EditNodeModal({
 		const finalNodes = updatedNodes.map((elem) =>
 			elem.id === id
 				? {
-						...elem,
 						id: input.id,
 						title: input.title,
 						body: input.body.split("\n").map((paragraph, index) => ({
@@ -84,6 +62,7 @@ export default function EditNodeModal({
 							text: paragraph,
 						})),
 						links: input.links,
+						start: input.start,
 					}
 				: elem,
 		);
@@ -94,55 +73,82 @@ export default function EditNodeModal({
 
 	return (
 		<BasicModal
-			// handleClose={() => {
-			// 	setInput(initialInput);
-			// }}
 			isVisible={isEditNodeModalVisible}
 			setIsVisible={setIsEditNodeModalVisible}
+			handleClose={() => setStartPressed(false)}
 		>
-			<Text>Title:</Text>
-			<View style={{ flexDirection: "row", gap: 5 }}>
-				<BasicTextInput
-					styles={{ flex: 1 }}
-					placeholder={"Title"}
-					value={input.title}
-					onChangeText={(text) => handleChange("title", text)}
-				/>
-				<BasicButton
-					disabled={input.start ? true : false}
-					type={input.start ? "secondary" : "primary"}
-					onPress={() => {
-						setInput((prev) => ({
-							...prev,
-							start: true,
-						}));
-						// setStoryNodes((prev) =>
-						// 	prev.map((elem) => ({
-						// 		...elem,
-						// 		start: false,
-						// 	})),
-						// );
-					}}
-				>
-					{input.start ? "Already start" : "Make Start"}
-				</BasicButton>
+			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+				<H1 style={{ marginBottom: 10 }}>Edit Story Node</H1>
+				<View style={{ flexDirection: "column", alignItems: "center" }}>
+					<BasicButton
+						disabled={input.start ? true : false}
+						type={input.start ? "secondary" : "primary"}
+						onPress={() => {
+							setInput((prev) => ({
+								...prev,
+								start: true,
+							}));
+							if (!input.start) setStartPressed(true);
+						}}
+					>
+						{input.start ? "Story starts here" : "Make story start here"}
+					</BasicButton>
+					{startPressed ? (
+						<>
+							<TextSubtle style={{ marginTop: 5 }}>
+								Dont forget to
+							</TextSubtle>
+							<TextSubtle>save your changes!</TextSubtle>
+						</>
+					) : (
+						<></>
+					)}
+				</View>
 			</View>
-			<Text>Body:</Text>
+			<TextBold style={{ fontSize: 16, marginVertical: 5, marginTop: 10 }}>
+				Title
+			</TextBold>
+			<BasicTextInput
+				label={"Title"}
+				placeholder={"Title"}
+				value={input.title}
+				onChangeText={(text) => handleChange("title", text)}
+			/>
+			<TextBold style={{ fontSize: 16, marginVertical: 5, marginTop: 10 }}>
+				Body
+			</TextBold>
 			<BasicTextarea
 				placeholder={"Body"}
 				value={input.body}
 				onChangeText={(text) => handleChange("body", text)}
+				label={"Body"}
 			/>
 
-			<Text
+			<View
 				style={{
-					fontSize: 15,
-					fontWeight: "bold",
-					marginVertical: 5,
+					flexDirection: "row",
+					justifyContent: "space-between",
+					alignItems: "baseline",
+					marginVertical: 10,
 				}}
 			>
-				Links
-			</Text>
+				<H2>Links</H2>
+				<BasicButton
+					type="secondary"
+					onPress={() =>
+						setInput((prev) => ({
+							...prev,
+							links: [
+								...prev.links,
+								{ id: Date.now(), text: "", targetId: null },
+							],
+						}))
+					}
+				>
+					Add link
+				</BasicButton>
+			</View>
+
 			{input.links.map((link, index) => {
 				const initialTargetNode = storyNodes.find(
 					(node) => node.id === link.targetId,
@@ -159,9 +165,8 @@ export default function EditNodeModal({
 						}}
 					>
 						<BasicTextInput
-							styles={{ flex: 1 }}
+							style={{ flex: 1 }}
 							value={link.text}
-							// onChangeText={handleChange('links')}
 							onChangeText={(text) => {
 								setInput((prev) => ({
 									...prev,
@@ -171,9 +176,8 @@ export default function EditNodeModal({
 								}));
 							}}
 						/>
-						<Text> ▶ </Text>
+						<Text>▶</Text>
 						<BasicSelect
-							styles={{ flex: 1 }}
 							options={storyNodes.map((elem) => {
 								return { id: elem.id, text: elem.title };
 							})}
@@ -204,26 +208,18 @@ export default function EditNodeModal({
 								}));
 							}}
 						>
-							Remove
+							✖
 						</BasicButton>
 					</View>
 				);
 			})}
-			<BasicButton
-				type="secondary"
-				onPress={() =>
-					setInput((prev) => ({
-						...prev,
-						links: [
-							...prev.links,
-							{ id: Date.now(), text: "", targetId: null },
-						],
-					}))
-				}
-			>
-				Add New Link
+
+			<BasicButton onPress={() => updateNode(node.id)} style={{ marginTop: 20 }}>
+				Save changes
 			</BasicButton>
-			<BasicButton onPress={() => updateNode(node.id)}>Update Node</BasicButton>
+			<TextSubtle style={{ textAlign: "center", marginTop: 10 }}>
+				Dont forget to save your changes!
+			</TextSubtle>
 		</BasicModal>
 	);
 }

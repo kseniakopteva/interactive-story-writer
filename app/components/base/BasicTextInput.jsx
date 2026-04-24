@@ -1,10 +1,11 @@
-import { TextInput } from "react-native";
+import { StyleSheet, TextInput } from "react-native";
+import { colors, fonts } from "../../../assets/theme";
 
 export default function BasicTextInput({
 	value,
 	onChangeText,
 	placeholder,
-	styles,
+	style,
 	...props
 }) {
 	return (
@@ -13,13 +14,22 @@ export default function BasicTextInput({
 			value={value}
 			onChangeText={onChangeText}
 			style={{
+				// flex: 1,
 				borderWidth: 1,
 				borderRadius: 5,
 				borderColor: "#aaa",
-				padding: 5,
-				...styles,
+				padding: 10,
+				...styles.text,
+				...style,
 			}}
 			{...props}
 		/>
 	);
 }
+const styles = StyleSheet.create({
+	text: {
+		fontFamily: fonts.fontParagraph,
+		fontSize: 13,
+		color: colors.text,
+	},
+});

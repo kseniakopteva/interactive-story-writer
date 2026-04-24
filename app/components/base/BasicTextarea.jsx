@@ -1,6 +1,12 @@
 import BasicTextInput from "./BasicTextInput";
 
-export default function BasicTextarea({ value, placeholder, onChangeText, props }) {
+export default function BasicTextarea({
+	value,
+	placeholder,
+	onChangeText,
+	props,
+	style,
+}) {
 	return (
 		<BasicTextInput
 			placeholder={placeholder}
@@ -9,9 +15,10 @@ export default function BasicTextarea({ value, placeholder, onChangeText, props 
 			editable
 			multiline={true}
 			numberOfLines={10}
-			styles={{
+			style={{
 				height: 200,
 				textAlignVertical: "top",
+				...style,
 			}}
 			{...props}
 		/>
