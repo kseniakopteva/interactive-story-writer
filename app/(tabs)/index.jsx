@@ -1,14 +1,7 @@
 import { colors, sizes } from "@/assets/theme";
 import { ScrollView, View } from "react-native";
 import BasicPanel from "../components/base/BasicPanel";
-import {
-	H1,
-	H3,
-	TextBold,
-	TextRegular,
-	TextSubtle,
-	Title,
-} from "../components/base/textComponents";
+import { H1, H3, TextBold, TextRegular, Title } from "../components/base/textComponents";
 
 export default function HomeScreen() {
 	return (
@@ -27,8 +20,7 @@ export default function HomeScreen() {
 					<TextBold>&quot;Story&quot;</TextBold> tab.
 					{"\n\n"}
 					Go to the <TextBold>&quot;Library&quot;</TextBold> to choose what
-					stories to read/edit.{" "}
-					<TextSubtle>(Not available currently, but coming soon!)</TextSubtle>
+					stories to read/edit.
 				</TextRegular>
 			</BasicPanel>
 			<BasicPanel
@@ -76,7 +68,7 @@ export default function HomeScreen() {
 					will create nodes with the according titles. If you wish to change
 					where they &quot;point&quot; later, you can do that in the{" "}
 					<TextBold>&quot;Edit the Story Node&quot;</TextBold> window (see{" "}
-					<TextBold>&quot;Editing node&quot;</TextBold> below)
+					<TextBold>&quot;Editing a node&quot;</TextBold> below)
 				</TextRegular>
 				<H3 style={{ marginTop: 20 }}>Editing a node</H3>
 				<TextRegular>
@@ -85,7 +77,7 @@ export default function HomeScreen() {
 					title of the node (only you can see it, it identifies the node amongst
 					others), the body (the text that will be shown to the reader) and add,
 					edit and remove links to other nodes. Click{" "}
-					<TextBold>&quot;Save Changes&quot;</TextBold> after every change,
+					<TextBold>&quot;Save Changes&quot;</TextBold> after every change;
 					nothing happens without your say-so!
 				</TextRegular>
 				<H3 style={{ marginTop: 20 }}>Deleting a node</H3>

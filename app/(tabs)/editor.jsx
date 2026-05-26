@@ -5,26 +5,39 @@ import { colors, sizes } from "../../assets/theme";
 import BasicButton from "../components/base/BasicButton";
 import AddNodeModal from "../components/modals/AddNodeModal";
 import ExportStoryModal from "../components/modals/ExportStoryModal";
+import ImportStoryModal from "../components/modals/ImportStoryModal";
 import StoryNodeList from "../components/StoryNodeList";
 
 export default function EditorScreen() {
 	const [addNodeModalVisible, setAddNodeModalVisible] = useState(false);
 	const [exportStoryModalVisible, setExportStoryModalVisible] = useState(false);
+	const [importStoryModalVisible, setImportStoryModalVisible] = useState(false);
 
 	const navigation = useNavigation();
 
 	useLayoutEffect(() => {
 		navigation.setOptions({
 			headerRight: () => (
-				<BasicButton
-					onPress={() => setExportStoryModalVisible(true)}
-					style={{
-						marginRight: 10,
-					}}
-					type="secondary"
-				>
-					Export Story
-				</BasicButton>
+				<>
+					<BasicButton
+						onPress={() => setImportStoryModalVisible(true)}
+						style={{
+							marginRight: 10,
+						}}
+						type="secondary"
+					>
+						Import Story
+					</BasicButton>
+					<BasicButton
+						onPress={() => setExportStoryModalVisible(true)}
+						style={{
+							marginRight: 10,
+						}}
+						type="secondary"
+					>
+						Export Story
+					</BasicButton>
+				</>
 			),
 		});
 	});
@@ -42,7 +55,6 @@ export default function EditorScreen() {
 				}}
 			>
 				<StoryNodeList />
-
 				<AddNodeModal
 					addNodeModalVisible={addNodeModalVisible}
 					setAddNodeModalVisible={setAddNodeModalVisible}
@@ -62,6 +74,10 @@ export default function EditorScreen() {
 			<ExportStoryModal
 				exportStoryModalVisible={exportStoryModalVisible}
 				setExportStoryModalVisible={setExportStoryModalVisible}
+			/>
+			<ImportStoryModal
+				importStoryModalVisible={importStoryModalVisible}
+				setImportStoryModalVisible={setImportStoryModalVisible}
 			/>
 		</ImageBackground>
 	);

@@ -53,6 +53,6 @@ export const sizes = {
 
 	textH1: 21,
 	textH2: 19,
-	textH3: 15,
+	textH3: 16,
 	textRegular: 14,
 };

@@ -25,8 +25,18 @@ export function H3({ children, style }) {
 	return <Text style={{ ...styles.h3, ...style }}>{children}</Text>;
 }
 
-export function TextRegular({ children, style }) {
-	return <Text style={{ ...styles.text, ...style }}>{children}</Text>;
+export function TextRegular({ children, sizeMultiplier = 1, style }) {
+	return (
+		<Text
+			style={{
+				...styles.text,
+				fontSize: styles.text.fontSize * sizeMultiplier,
+				...style,
+			}}
+		>
+			{children}
+		</Text>
+	);
 }
 
 export function TextBold({ children, style }) {

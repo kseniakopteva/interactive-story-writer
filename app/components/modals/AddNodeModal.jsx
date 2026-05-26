@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { View } from "react-native";
-import { StoryNodeContext } from "../../contexts";
+import { StoryContext } from "../../contexts";
 import BasicButton from "../base/BasicButton";
 import BasicModal from "../base/BasicModal";
 import BasicTextInput from "../base/BasicTextInput";
@@ -8,7 +8,7 @@ import BasicTextarea from "../base/BasicTextarea";
 import { H1, H2, TextError } from "../base/textComponents";
 
 export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisible }) {
-	const { storyNodes, setStoryNodes } = useContext(StoryNodeContext);
+	const { setStories, currentStoryId } = useContext(StoryContext);
 
 	const [titleInput, setTitleInput] = useState("");
 	const [bodyInput, setBodyInput] = useState("");
@@ -34,7 +34,7 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 	const saveNewNode = () => {
 		if (!validate()) return;
 
-		const newId = Date.now();
+		const newId = Date.now() + "0";
 
 		// Convert bodyInput to array of paragraphs (split by newline)
 		const bodyArray =
@@ -45,7 +45,7 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 		const linkedNodes = linkForms
 			.filter((text) => text.trim() !== "")
 			.map((text, index) => ({
-				id: Date.now(),
+				id: Date.now() + index,
 				title: text,
 				body: null,
 				links: [],
@@ -67,7 +67,19 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 		};
 
 		// Add new node to the array
-		setStoryNodes([...storyNodes, newNode, ...linkedNodes]);
+		setStories((prevStories) =>
+			prevStories.map((story) => {
+				if (story.id !== currentStoryId) return story;
+
+				return {
+					...story,
+					storyNodes: [...story.storyNodes, newNode, ...linkedNodes],
+					timestamp_edited: Date.now(),
+					default: false // TODO: delete the key instead of setting it to false
+				};
+				
+			}),
+		);
 
 		// Close modal
 		setAddNodeModalVisible(false);
@@ -76,6 +88,7 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 		setTitleInput("");
 		setBodyInput("");
 		setLinkForms([""]);
+		setErrors({ title: "", body: "", links: "" });
 	};
 
 	function validate() {
@@ -83,14 +96,28 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 			setErrors((prev) => ({ ...prev, title: "Title cannot be empty" }));
 			return false;
 		}
+		if (titleInput.length > 100) {
+			setErrors((prev) => ({
+				...prev,
+				title: "Title cannot be longer than 100 symbols",
+			}));
+			return false;
+		}
 		return true;
+	}
+
+	function onClose() {
+		setTitleInput("");
+		setBodyInput("");
+		setLinkForms([]);
 	}
 
 	return (
 		<BasicModal
 			isVisible={addNodeModalVisible}
 			setIsVisible={setAddNodeModalVisible}
-			handleClose={() => setLinkForms([])}
+			handleClose={onClose}
+			showCancelButton={true}
 		>
 			<H1 style={{ marginBottom: 10 }}>Add New Story Node</H1>
 
@@ -100,9 +127,9 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 					value={titleInput}
 					onChangeText={setTitleInput}
 				/>
-				{errors.title !== "" && (
+				{errors.title !== "" ? (
 					<TextError style={{ marginVertical: 5 }}>{errors.title}</TextError>
-				)}
+				): <></>}
 				<BasicTextarea
 					placeholder={"Body"}
 					value={bodyInput}

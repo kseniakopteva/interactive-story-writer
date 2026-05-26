@@ -6,7 +6,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useContext } from "react";
 import { Text } from "react-native";
 import BasicButton from "../base/BasicButton";
-import { H1 } from "../base/textComponents";
+import { H1, TextRegular } from "../base/textComponents";
 
 export default function ExportStoryModal({
 	exportStoryModalVisible,
@@ -19,14 +19,15 @@ export default function ExportStoryModal({
 	).storyNodes;
 
 	async function exportToTwee() {
+		// TODO: file name should be story's parsed title
 		const uri = FileSystem.documentDirectory + "myFile.txt";
 
-		await FileSystem.writeAsStringAsync(uri, parseCurrentStory());
+		await FileSystem.writeAsStringAsync(uri, parseCurrentStoryToTwee());
 
 		await Sharing.shareAsync(uri);
 	}
 
-	function parseCurrentStory() {
+	function parseCurrentStoryToTwee() {
 		let fileText = "";
 
 		let onlyTitles = currentStoryNodes.map((node) => node.title);
@@ -64,15 +65,31 @@ export default function ExportStoryModal({
 		return fileText;
 	}
 
+	async function exportToJSON() {
+		const uri = FileSystem.documentDirectory + "myFile.json";
+
+		await FileSystem.writeAsStringAsync(uri, parseCurrentStoryToJSON());
+
+		await Sharing.shareAsync(uri);
+	}
+
+	function parseCurrentStoryToJSON() {
+		const fileText = JSON.stringify(stories);
+		return fileText;
+	}
+
 	return (
 		<BasicModal
 			isVisible={exportStoryModalVisible}
 			setIsVisible={setExportStoryModalVisible}
 		>
 			<H1 style={{ marginBottom: 10 }}>Export Story</H1>
-			<Text>Here are the available options of export:</Text>
+			<TextRegular>Here are the available options of export:</TextRegular>
 			<BasicButton onPress={exportToTwee} style={{ marginTop: 20 }}>
 				Export to Twee Format
+			</BasicButton>
+			<BasicButton onPress={exportToJSON} style={{ marginTop: 10 }}>
+				Export as JSON
 			</BasicButton>
 			<BasicButton onPress={() => {}} style={{ marginTop: 10 }} disabled={true}>
 				Export to ???

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, sizes } from "../../../assets/theme";
+import BasicButton from "./BasicButton";
 import { TextRegular } from "./textComponents";
 
 export default function BasicSelect({
@@ -43,7 +44,7 @@ export default function BasicSelect({
 						flex: 1,
 						justifyContent: "flex-end",
 						marginBottom: 10,
-						// backgroundColor: "rgba(0,0,0,0.3)",
+						backgroundColor: "rgba(0, 3, 37, 0.5)",
 					}}
 				>
 					{/* background click catcher */}
@@ -56,22 +57,26 @@ export default function BasicSelect({
 					<View
 						style={{
 							marginHorizontal: 20,
+							marginVertical: "auto",
 							backgroundColor: "white",
 							borderRadius: sizes.borderRadius,
-							padding: 10,
+							padding: 20,
 							elevation: 5,
 						}}
 					>
+						<TextRegular>
+							Choose the node you want this link to point to:
+						</TextRegular>
 						<FlatList
 							data={options}
 							keyExtractor={(item) => item.id.toString()}
 							renderItem={({ item }) => (
-								<Pressable
-									style={{ padding: 12 }}
+								<BasicButton
+									style={{ marginTop: 5 }}
 									onPress={() => handleSelect(item)}
 								>
 									<Text>{item.text}</Text>
-								</Pressable>
+								</BasicButton>
 							)}
 						/>
 					</View>

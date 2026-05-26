@@ -1,41 +1,62 @@
 import { useContext, useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import { StoryNodeContext } from "../../contexts";
+import { StoryContext } from "../../contexts";
 import BasicButton from "../base/BasicButton";
 import BasicModal from "../base/BasicModal";
 import BasicSelect from "../base/BasicSelect";
 import BasicTextarea from "../base/BasicTextarea";
 import BasicTextInput from "../base/BasicTextInput";
-import { H1, H2, TextBold, TextSubtle } from "../base/textComponents";
+import { H1, H3, TextError, TextSubtle } from "../base/textComponents";
 
 export default function EditNodeModal({
 	node,
 	isEditNodeModalVisible,
 	setIsEditNodeModalVisible,
 }) {
-	const { storyNodes, setStoryNodes } = useContext(StoryNodeContext);
-
-	const [input, setInput] = useState({
+	const INITIAL_INPUT = {
 		id: node.id,
 		title: node.title,
 		body: node.body?.map((paragraph) => paragraph.text).join(`\n`),
 		links: node.links,
+		createdLinks: [],
 		start: node.start,
-	});
+	};
 
-	const [startPressed, setStartPressed] = useState(false);
+	const { stories, setStories, currentStoryId } = useContext(StoryContext);
+	const [input, setInput] = useState(INITIAL_INPUT);
+	const [errors, setErrors] = useState({ title: "" });
 
+	const currentStoryNodes = stories.find(
+		(story) => story.id === currentStoryId,
+	).storyNodes;
+
+	// did user press the "set as start" button?
+	// used to display the "don't forget to save!" text
+	const [wasStartPressed, setWasStartPressed] = useState(false);
+
+	// without this, when changing stories, the modal will show the
+	// previous node opened
 	useEffect(() => {
-		if (!isEditNodeModalVisible) return;
-
 		setInput({
 			id: node.id,
 			title: node.title,
-			body: node.body?.map((p) => p.text).join("\n"),
+			body: node.body?.map((paragraph) => paragraph.text).join("\n"),
 			links: node.links,
+			createdLinks: [],
 			start: node.start,
 		});
 	}, [node, isEditNodeModalVisible]);
+
+	// remove errors when the user is (supposedly) fixing them
+	useEffect(() => {
+		setErrors((prev) => ({ ...prev, title: "" }));
+	}, [input.title]);
+
+	// reset on modal close
+	function onClose() {
+		setInput(INITIAL_INPUT);
+		setWasStartPressed(false);
+	}
 
 	function handleChange(field, text) {
 		setInput((prev) => ({
@@ -44,30 +65,80 @@ export default function EditNodeModal({
 		}));
 	}
 
+	function validate() {
+		if (input.title === "") {
+			setErrors((prev) => ({ ...prev, title: "Title cannot be empty" }));
+			return false;
+		}
+		if (input.title.length > 100) {
+			setErrors((prev) => ({
+				...prev,
+				title: "Title cannot be longer than 100 symbols",
+			}));
+			return false;
+		}
+		return true;
+	}
+
 	function updateNode(id) {
-		setStartPressed(false);
+		if (!validate()) return;
 
-		const updatedNodes = storyNodes.map((elem) => ({
-			...elem,
-			start: elem.id === id ? input.start : false,
+		// reset
+		setWasStartPressed(false);
+
+		// new links
+		const linkedNodes = input.createdLinks
+			.filter((link) => link.text.trim() !== "")
+			.map((link, index) => ({
+				id: Date.now() + index,
+				title: link.text,
+				body: null,
+				links: [],
+				start: false,
+			}));
+
+		const linksArray = linkedNodes.map((node) => ({
+			id: node.id,
+			text: node.title,
+			targetId: node.id,
 		}));
+		// end new links
 
-		const finalNodes = updatedNodes.map((elem) =>
-			elem.id === id
-				? {
-						id: input.id,
-						title: input.title,
-						body: input.body.split("\n").map((paragraph, index) => ({
-							id: index + 1,
-							text: paragraph,
-						})),
-						links: input.links,
-						start: input.start,
-					}
-				: elem,
+		setStories((prevStories) =>
+			prevStories.map((story) => {
+				if (story.id !== currentStoryId) return story;
+
+				return {
+					...story,
+					storyNodes: [
+						...story.storyNodes.map((node) => {
+							if (node.id !== id)
+								return {
+									...node,
+									start: input.start ? false : node.start,
+								};
+
+							return {
+								id: input.id,
+								title: input.title,
+								body: input.body?.split("\n").map((paragraph, index) => ({
+									id: index + 1,
+									text: paragraph,
+								})),
+								links: [...input.links, ...linksArray],
+								start: input.start,
+							};
+						}),
+						...linkedNodes,
+					],
+					timestamp_edited: Date.now(),
+					default: false, // TODO: delete the key instead of setting it to false
+				};
+			}),
 		);
 
-		setStoryNodes(finalNodes);
+		console.log(stories);
+
 		setIsEditNodeModalVisible(false);
 	}
 
@@ -75,7 +146,8 @@ export default function EditNodeModal({
 		<BasicModal
 			isVisible={isEditNodeModalVisible}
 			setIsVisible={setIsEditNodeModalVisible}
-			handleClose={() => setStartPressed(false)}
+			handleClose={onClose}
+			showCancelButton={true}
 		>
 			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 				<H1 style={{ marginBottom: 10 }}>Edit Story Node</H1>
@@ -88,12 +160,12 @@ export default function EditNodeModal({
 								...prev,
 								start: true,
 							}));
-							if (!input.start) setStartPressed(true);
+							if (!input.start) setWasStartPressed(true);
 						}}
 					>
 						{input.start ? "Story starts here" : "Make story start here"}
 					</BasicButton>
-					{startPressed ? (
+					{wasStartPressed ? (
 						<>
 							<TextSubtle style={{ marginTop: 5 }}>
 								Dont forget to
@@ -105,23 +177,26 @@ export default function EditNodeModal({
 					)}
 				</View>
 			</View>
-			<TextBold style={{ fontSize: 16, marginVertical: 5, marginTop: 10 }}>
-				Title
-			</TextBold>
+			<H3 style={{ marginVertical: 5, marginTop: 10 }}>Title</H3>
 			<BasicTextInput
 				label={"Title"}
 				placeholder={"Title"}
 				value={input.title}
 				onChangeText={(text) => handleChange("title", text)}
 			/>
-			<TextBold style={{ fontSize: 16, marginVertical: 5, marginTop: 10 }}>
-				Body
-			</TextBold>
+			{errors.title !== ""? (
+				<TextError style={{ marginVertical: 5 }}>{errors.title}</TextError>
+			): <></>}
+			<H3 style={{ marginVertical: 5, marginTop: 10 }}>Body</H3>
 			<BasicTextarea
 				placeholder={"Body"}
 				value={input.body}
 				onChangeText={(text) => handleChange("body", text)}
 				label={"Body"}
+				numberOfLines={20}
+				style={{
+					height: 330,
+				}}
 			/>
 
 			<View
@@ -132,14 +207,14 @@ export default function EditNodeModal({
 					marginVertical: 10,
 				}}
 			>
-				<H2>Links</H2>
+				<H3>Links</H3>
 				<BasicButton
 					type="secondary"
 					onPress={() =>
 						setInput((prev) => ({
 							...prev,
-							links: [
-								...prev.links,
+							createdLinks: [
+								...prev.createdLinks,
 								{ id: Date.now(), text: "", targetId: null },
 							],
 						}))
@@ -150,7 +225,7 @@ export default function EditNodeModal({
 			</View>
 
 			{input.links.map((link, index) => {
-				const initialTargetNode = storyNodes.find(
+				const initialTargetNode = currentStoryNodes.find(
 					(node) => node.id === link.targetId,
 				);
 
@@ -178,7 +253,7 @@ export default function EditNodeModal({
 						/>
 						<Text>▶</Text>
 						<BasicSelect
-							options={storyNodes.map((elem) => {
+							options={currentStoryNodes.map((elem) => {
 								return { id: elem.id, text: elem.title };
 							})}
 							initialSelected={
@@ -214,12 +289,41 @@ export default function EditNodeModal({
 				);
 			})}
 
-			<BasicButton onPress={() => updateNode(node.id)} style={{ marginTop: 20 }}>
-				Save changes
-			</BasicButton>
+			{input.createdLinks?.map((createdLink, index) => {
+				return (
+					<View
+						key={index}
+						style={{
+							gap: 5,
+							marginBottom: 10,
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<BasicTextInput
+							style={{ flex: 1 }}
+							value={createdLink.text}
+							onChangeText={(text) => {
+								setInput((prev) => ({
+									...prev,
+									createdLinks: input.createdLinks.map((l) =>
+										l.id === createdLink.id
+											? { ...l, text: text }
+											: l,
+									),
+								}));
+							}}
+						/>
+					</View>
+				);
+			})}
+
 			<TextSubtle style={{ textAlign: "center", marginTop: 10 }}>
 				Dont forget to save your changes!
 			</TextSubtle>
+			<BasicButton onPress={() => updateNode(node.id)} style={{ marginTop: 10 }}>
+				Save changes
+			</BasicButton>
 		</BasicModal>
 	);
 }

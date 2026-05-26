@@ -3,38 +3,45 @@ import { PixelRatio, View } from "react-native";
 import { colors } from "../../assets/theme";
 import BasicButton from "../components/base/BasicButton";
 import BasicPanel from "../components/base/BasicPanel";
-import { StoryNodeContext } from "../contexts";
+import { StoryContext } from "../contexts";
 import { H1, H2, TextBold, TextRegular, TextSubtle } from "./base/textComponents";
-import DeletionConfirmationModal from "./modals/DeletionConfirmationModal";
+import DeleteNodeConfirmationModal from "./modals/DeleteNodeConfirmationModal";
 import EditNodeModal from "./modals/EditNodeModal";
 
 export default function StoryNodeListItem({ node }) {
-	const { storyNodes, setStoryNodes } = useContext(StoryNodeContext);
+	const { stories, currentStoryId } = useContext(StoryContext);
+
+	const currentStoryNodes = stories.find(
+		(story) => story.id === currentStoryId,
+	).storyNodes;
 
 	const [isEditNodeModalVisible, setIsEditNodeModalVisible] = useState(false);
-	const [isDeletionModalVisible, setIsDeletionModalVisible] = useState(false);
+	const [isDeleteNodeModalVisible, setIsDeleteNodeModalVisible] = useState(false);
 
 	const startNodeStyle = node.start
 		? { borderColor: colors.primary, borderWidth: 2, borderStyle: "dotted" }
 		: "";
 
+	const isLargeText = PixelRatio.getFontScale() > 1.2;
 
-  const isLargeText = PixelRatio.getFontScale() > 1.2;
-	
+	const fullText = node.body?.map((paragraph) => paragraph.text).join(`\n`);
+	const sliceResult = fullText?.slice(0, 250);
+	const excerpt = sliceResult === fullText ? fullText : sliceResult + " ...";
+
 	return (
 		<BasicPanel style={{ ...startNodeStyle }}>
 			<View
 				style={{
-					flexDirection: isLargeText ? 'column' : 'row',
+					flexDirection: isLargeText ? "column" : "row",
 					alignItems: "flex-start",
 					justifyContent: "space-between",
 				}}
 			>
-				<H1 style={{  flexShrink: 1, marginBottom: 10 }}>{node.title} </H1>
-				<View style={{ flexDirection: "row", gap: 5}}>
+				<H1 style={{ flexShrink: 1, marginBottom: 10 }}>{node.title} </H1>
+				<View style={{ flexDirection: "row", gap: 5 }}>
 					<BasicButton
 						type="secondary"
-						onPress={() => setIsDeletionModalVisible(true)}
+						onPress={() => setIsDeleteNodeModalVisible(true)}
 					>
 						Remove
 					</BasicButton>
@@ -46,11 +53,9 @@ export default function StoryNodeListItem({ node }) {
 					</BasicButton>
 				</View>
 			</View>
-			<View style={{ marginBottom: 10 }}>
+			<View style={{ marginVertical: 10 }}>
 				{node.body && node.body.length > 0 ? (
-					node.body.map((paragraph) => (
-						<TextRegular key={paragraph.id}>{paragraph.text}</TextRegular>
-					))
+					<TextRegular>{excerpt}</TextRegular>
 				) : (
 					<TextSubtle>No text...</TextSubtle>
 				)}
@@ -61,7 +66,7 @@ export default function StoryNodeListItem({ node }) {
 					<TextSubtle>No links...</TextSubtle>
 				) : (
 					node.links.map((link) => {
-						const linkTargetNode = storyNodes.find(
+						const linkTargetNode = currentStoryNodes.find(
 							(node) => node.id === link.targetId,
 						);
 						return (
@@ -83,11 +88,11 @@ export default function StoryNodeListItem({ node }) {
 				isEditNodeModalVisible={isEditNodeModalVisible}
 				setIsEditNodeModalVisible={setIsEditNodeModalVisible}
 			/>
-			<DeletionConfirmationModal
+			<DeleteNodeConfirmationModal
 				node={node}
-				isDeletionModalVisible={isDeletionModalVisible}
-				setIsDeletionModalVisible={setIsDeletionModalVisible}
-			></DeletionConfirmationModal>
+				isDeleteNodeModalVisible={isDeleteNodeModalVisible}
+				setIsDeleteNodeModalVisible={setIsDeleteNodeModalVisible}
+			></DeleteNodeConfirmationModal>
 		</BasicPanel>
 	);
 }

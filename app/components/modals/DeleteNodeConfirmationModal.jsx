@@ -1,28 +1,40 @@
 import { useContext } from "react";
-import { StoryNodeContext } from "../../contexts";
+import { StoryContext } from "../../contexts";
 import BasicButton from "../base/BasicButton";
 import BasicModal from "../base/BasicModal";
-import { H2, TextBold, TextRegular } from "../base/textComponents";
+import { H1, TextBold, TextRegular } from "../base/textComponents";
 
-export default function DeletionConfirmationModal({
+export default function DeleteNodeConfirmationModal({
 	node,
-	isDeletionModalVisible,
-	setIsDeletionModalVisible,
+	isDeleteNodeModalVisible,
+	setIsDeleteNodeModalVisible,
 }) {
-	const { storyNodes, setStoryNodes } = useContext(StoryNodeContext);
+	const { setStories, currentStoryId } = useContext(StoryContext);
+
 	const sumOfSymbols = node.body?.map((paragraph) => paragraph.text).join(`\n`).length;
 
 	function removeNode() {
-		setStoryNodes((prev) => prev.filter((n) => n.id !== node.id));
+		setStories((prevStories) =>
+			prevStories.map((story) => {
+				if (story.id !== currentStoryId) return story;
+
+				return {
+					...story,
+					storyNodes: story.storyNodes.filter((n) => n.id !== node.id),
+					timestamp_edited: Date.now(),
+					default: false, // TODO: delete the key instead of setting it to false
+				};
+			}),
+		);
 	}
 
 	return (
 		<BasicModal
-			isVisible={isDeletionModalVisible}
-			setIsVisible={setIsDeletionModalVisible}
+			isVisible={isDeleteNodeModalVisible}
+			setIsVisible={setIsDeleteNodeModalVisible}
 			style={{ gap: 10 }}
 		>
-			<H2>Delete Node</H2>
+			<H1 style={{ marginBottom: 10 }}>Delete Node</H1>
 			<TextRegular style={{ marginBottom: 10 }}>
 				You are deleting node <TextBold>&quot;{node.title}&quot;</TextBold> with{" "}
 				{node.body?.length} paragraphs written, a total of {sumOfSymbols} symbols,
@@ -34,7 +46,7 @@ export default function DeletionConfirmationModal({
 			</BasicButton>
 			<BasicButton
 				type="secondary"
-				onPress={() => setIsDeletionModalVisible(false)}
+				onPress={() => setIsDeleteNodeModalVisible(false)}
 			>
 				No, I changed my mind
 			</BasicButton>

@@ -1,11 +1,13 @@
 import { Modal, Pressable } from "react-native";
 import { sizes } from "../../../assets/theme";
+import BasicButton from "./BasicButton";
 
 export default function BasicModal({
 	isVisible,
 	setIsVisible,
 	handleClose = () => {},
 	children,
+	showCancelButton = false,
 	style,
 }) {
 	function onClose() {
@@ -14,7 +16,7 @@ export default function BasicModal({
 	}
 
 	return (
-		<Modal visible={isVisible} transparent={true}>
+		<Modal visible={isVisible} transparent={true} animationType="fade">
 			<Pressable
 				style={{
 					flex: 1,
@@ -36,6 +38,15 @@ export default function BasicModal({
 					}}
 				>
 					{children}
+					{showCancelButton? (
+						<BasicButton
+							type="secondary"
+							style={{ marginTop: 10 }}
+							onPress={onClose}
+						>
+							Cancel
+						</BasicButton>
+					): <></>}
 				</Pressable>
 			</Pressable>
 		</Modal>

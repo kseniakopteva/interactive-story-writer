@@ -1,23 +1,27 @@
 import { colors, fonts, sizes } from "@/assets/theme";
 import { useNavigation } from "expo-router";
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import BasicButton from "../components/base/BasicButton";
 import BasicPanel from "../components/base/BasicPanel";
-import { TextBold, TextRegular } from "../components/base/textComponents";
+import { TextBold, TextRegular, TextSubtle } from "../components/base/textComponents";
 import ErrorBanner from "../components/ErrorBanner";
-import { StoryNodeContext } from "../contexts";
+import { StoryContext } from "../contexts";
+
+import { SourceSerif4_500Medium, useFonts } from "@expo-google-fonts/source-serif-4";
 
 export default function StoryScreen() {
-	const { storyNodes } = useContext(StoryNodeContext);
+	const { stories, currentStoryId } = useContext(StoryContext);
 
-	const [activeNode, setActiveNode] = useState(
-		storyNodes.find((elem) => elem.start === true),
-	);
+	const currentStoryNodes = stories.find(
+		(story) => story.id === currentStoryId,
+	)?.storyNodes;
 
-	useEffect(() => {
-		setActiveNode(storyNodes.find((elem) => elem.start === true));
-	}, [storyNodes]);
+	const [activeNodeId, setActiveNodeId] = useState(null);
+
+	const activeNode =
+		currentStoryNodes?.find((node) => node.id === activeNodeId) ||
+		currentStoryNodes?.find((node) => node.start === true);
 
 	const navigation = useNavigation();
 
@@ -25,9 +29,7 @@ export default function StoryScreen() {
 		navigation.setOptions({
 			headerRight: () => (
 				<BasicButton
-					onPress={() =>
-						setActiveNode(storyNodes.find((elem) => elem.start === true))
-					}
+					onPress={() => setActiveNodeId(null)}
 					style={{
 						marginRight: 10,
 					}}
@@ -38,6 +40,14 @@ export default function StoryScreen() {
 			),
 		});
 	});
+
+	const [fontsLoaded] = useFonts({
+		SourceSerif4_500Medium,
+	});
+
+	if (!fontsLoaded) {
+		return null;
+	}
 
 	if (activeNode === undefined || activeNode === null)
 		return (
@@ -57,40 +67,48 @@ export default function StoryScreen() {
 				flex: 1,
 				backgroundColor: colors.backgroundDark,
 			}}
-			contentContainerStyle={{
-				flexDirection: "row",
-				justifyContent: "center",
-				flex: 1,
-			}}
+			contentContainerStyle={
+				{
+					// flexDirection: "row",
+					// justifyContent: "center",
+				}
+			}
 		>
 			<BasicPanel
 				style={{
-					flex: 1,
 					margin: sizes.screenMargin,
 					padding: 20,
+					// flex: 1,
 				}}
 			>
-				<View>
+				<View style={{ width: "100%" }}>
 					{activeNode?.body?.map((paragraph) => (
-						<TextRegular key={paragraph.id}>
+						<TextRegular key={paragraph.id} sizeMultiplier={1.07}>
 							{paragraph.text}
 							{"\n"}
 						</TextRegular>
+						// <Text
+						// 	style={{
+						// 		fontFamily: fonts.fontParagraph,
+						// 		fontSize: sizes.textRegular + 1,
+						// 		color: colors.text,
+						// 	}}
+						// 	key={paragraph.id}
+						// >
+						// 	{paragraph.text}
+						// 	{"\n"}
+						// </Text>
 					))}
 				</View>
 
 				{activeNode?.links.map((link) => {
-					const isLinkDead = !storyNodes.find(
+					const isLinkDead = !currentStoryNodes.find(
 						(node) => node.id === link.targetId,
 					);
 					return (
 						<Pressable
 							key={link.id}
-							onPress={() =>
-								setActiveNode(
-									storyNodes.find((elem) => elem.id === link.targetId),
-								)
-							}
+							onPress={() => setActiveNodeId(link.targetId)}
 							style={{
 								paddingVertical: 5,
 								marginBottom: 5,
@@ -103,6 +121,11 @@ export default function StoryScreen() {
 						</Pressable>
 					);
 				})}
+
+				{activeNode?.links === undefined ||
+					(activeNode?.links.length === 0 ? (
+						<TextSubtle style={{ textStyle: "italic", fontSize: sizes.textRegular * 1.1 }}>The End.</TextSubtle>
+					) : <></>)}
 			</BasicPanel>
 		</ScrollView>
 	);
@@ -114,9 +137,12 @@ const styles = StyleSheet.create({
 	},
 	link: {
 		fontFamily: fonts.fontParagraphBold,
+		fontSize: sizes.textRegular * 1.2,
+		color: colors.primary,
 	},
 	deadLink: {
 		fontFamily: fonts.fontParagraph,
 		color: colors.textSubtle,
+		fontSize: sizes.textRegular * 1.2,
 	},
 });
