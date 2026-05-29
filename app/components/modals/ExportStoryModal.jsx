@@ -11,10 +11,10 @@ export default function ExportStoryModal({
 	exportStoryModalVisible,
 	setExportStoryModalVisible,
 }) {
-	const { stories, currentStoryId } = useContext(StoryContext);
+	const { getCurrentStory, getCurrentStoryNodes } = useContext(StoryContext);
 
-	const currentStory = stories.find((story) => story.id === currentStoryId);
-	const currentStoryNodes = currentStory.storyNodes;
+	const currentStory = getCurrentStory();
+	const currentStoryNodes = getCurrentStoryNodes();
 
 	async function exportToTwee() {
 		const uri = getCurrentStoryUri();
@@ -47,10 +47,16 @@ export default function ExportStoryModal({
 				const targetLink = currentStoryNodes.find(
 					(node) => node.id === link.targetId,
 				);
-				return [link.text, targetLink.title];
+				if (link.text === "") return [];
+
+				const shownLinkText = link.text;
+				const titleOfLinkedNode = targetLink?.title;
+
+				return [shownLinkText, titleOfLinkedNode];
 			});
 
 			linkArrayWithTargets.forEach((linkArr) => {
+				if (linkArr === undefined || linkArr.length === 0) return;
 				if (linkArr[0] === linkArr[1]) fileText += `[[${linkArr[0]}]]\n`;
 				else fileText += `[[${linkArr[0]}->${linkArr[1]}]]\n`;
 			});

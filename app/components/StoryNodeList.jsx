@@ -7,10 +7,10 @@ import { StoryContext } from "../contexts";
 import { TextBold } from "./base/textComponents";
 
 export default function StoryNodeList() {
-	const { stories, currentStoryId } = useContext(StoryContext);
+	const { getCurrentStory, getCurrentStoryNodes } = useContext(StoryContext);
 
-	const currentStory = stories.find((story) => story.id === currentStoryId);
-	const currentStoryNodes = currentStory?.storyNodes;
+	const currentStory = getCurrentStory();
+	const currentStoryNodes = getCurrentStoryNodes();
 
 	return (
 		<View
@@ -27,7 +27,9 @@ export default function StoryNodeList() {
 					as delete this one. (If you edit anything in this story this banner
 					will dissapear). Good luck! :)
 				</ErrorBanner>
-			) : <></>}
+			) : (
+				<></>
+			)}
 
 			{currentStoryNodes?.map((node) => (
 				<StoryNodeListItem key={node.id} node={node} />

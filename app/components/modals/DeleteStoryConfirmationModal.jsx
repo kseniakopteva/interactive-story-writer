@@ -9,8 +9,7 @@ export default function DeleteNodeConfirmationModal({
 	isDeleteStoryModalVisible,
 	setIsDeleteStoryModalVisible,
 }) {
-	const { stories, setStories, currentStoryId, setCurrentStoryId } =
-		useContext(StoryContext);
+	const { removeStory } = useContext(StoryContext);
 
 	const sumOfSymbols =
 		story.storyNodes
@@ -19,18 +18,6 @@ export default function DeleteNodeConfirmationModal({
 					node.body?.map((paragraph) => paragraph.text || "").join("\n") || "",
 			)
 			.join("\n").length || 0;
-
-	function removeStory() {
-		setStories((prev) => {
-			const newStories = prev.filter((s) => {
-				if (s.id !== story.id) return story;
-			});
-
-			if (story.id === currentStoryId) setCurrentStoryId(newStories[0].id);
-
-			return newStories;
-		});
-	}
 
 	return (
 		<BasicModal
@@ -45,7 +32,7 @@ export default function DeleteNodeConfirmationModal({
 				symbols written.
 			</TextRegular>
 			<TextRegular style={{ marginBottom: 10 }}>Are you sure?</TextRegular>
-			<BasicButton type="danger" onPress={removeStory}>
+			<BasicButton type="danger" onPress={() => removeStory(story.id)}>
 				Yes, delete it forever
 			</BasicButton>
 			<BasicButton

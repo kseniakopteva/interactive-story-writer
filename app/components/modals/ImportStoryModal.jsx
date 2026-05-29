@@ -11,7 +11,7 @@ export default function ImportStoryModal({
 	importStoryModalVisible,
 	setImportStoryModalVisible,
 }) {
-	const { setStories } = useContext(StoryContext);
+	const { addStory } = useContext(StoryContext);
 
 	async function importFromJSON() {
 		try {
@@ -31,7 +31,7 @@ export default function ImportStoryModal({
 			let newStory = JSON.parse(fileContents);
 			newStory.id = Date.now();
 			newStory.title = `${newStory.title} [imported]`;
-			setStories((prev) => [...prev, newStory]);
+			addStory(newStory);
 
 			setImportStoryModalVisible(false);
 		} catch (error) {

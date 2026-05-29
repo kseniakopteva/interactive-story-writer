@@ -11,11 +11,9 @@ import { StoryContext } from "../contexts";
 import { SourceSerif4_500Medium, useFonts } from "@expo-google-fonts/source-serif-4";
 
 export default function StoryScreen() {
-	const { stories, currentStoryId } = useContext(StoryContext);
+	const { getCurrentStoryNodes } = useContext(StoryContext);
 
-	const currentStoryNodes = stories.find(
-		(story) => story.id === currentStoryId,
-	)?.storyNodes;
+	const currentStoryNodes = getCurrentStoryNodes();
 
 	const [activeNodeId, setActiveNodeId] = useState(null);
 

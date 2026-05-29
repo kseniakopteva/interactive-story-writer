@@ -15,7 +15,7 @@ export default function EditStoryModal({ story, editStoryModal, setEditStoryModa
 		active: currentStoryId === story.id,
 	};
 
-	const { currentStoryId, setCurrentStoryId, setStories } = useContext(StoryContext);
+	const { updateStory, currentStoryId, setCurrentStoryId } = useContext(StoryContext);
 	const [input, setInput] = useState(INITIAL_INPUT);
 	const [errors, setErrors] = useState({ title: "", description: "" });
 
@@ -46,24 +46,16 @@ export default function EditStoryModal({ story, editStoryModal, setEditStoryModa
 		}));
 	}
 
-	function updateStory(id) {
+	function updateStoryLocal(id) {
 		if (!validate()) return;
 		setWasActivePressed(false);
 
-		setStories((prevStories) =>
-			prevStories.map((s) => {
-				if (s.id === story.id)
-					return {
-						...story,
-						title: input.title,
-						description: input.description,
-						timestamp_edited: Date.now(),
-						default: false, // TODO: delete the key instead of setting it to false
-					};
-
-				return s;
-			}),
-		);
+		updateStory(story.id, {
+			title: input.title,
+			description: input.description,
+			timestamp_edited: Date.now(),
+			default: false, // TODO: delete the key instead of setting it to false
+		});
 
 		if (input.active) setCurrentStoryId(story.id);
 
@@ -144,7 +136,9 @@ export default function EditStoryModal({ story, editStoryModal, setEditStoryModa
 				/>
 				{errors.title !== "" ? (
 					<TextError style={{ marginVertical: 5 }}>{errors.title}</TextError>
-				) : <></>}
+				) : (
+					<></>
+				)}
 				<H3 style={{ marginVertical: 5, marginTop: 10 }}>Description</H3>
 				<BasicTextarea
 					label={"Description"}
@@ -152,16 +146,18 @@ export default function EditStoryModal({ story, editStoryModal, setEditStoryModa
 					value={input.description}
 					onChangeText={(value) => handleChange("description", value)}
 				/>
-				{errors.description !== ""? (
+				{errors.description !== "" ? (
 					<TextError style={{ marginVertical: 5 }}>
 						{errors.description}
 					</TextError>
-				): <></>}
+				) : (
+					<></>
+				)}
 				<TextSubtle style={{ textAlign: "center", marginTop: 20 }}>
 					Dont forget to save your changes!
 				</TextSubtle>
 				<BasicButton
-					onPress={() => updateStory(story.id)}
+					onPress={() => updateStoryLocal(story.id)}
 					style={{ marginTop: 10 }}
 				>
 					Save changes

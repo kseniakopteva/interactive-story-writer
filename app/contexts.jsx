@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 
 export const StoryContext = createContext(null);
 
@@ -52,13 +52,113 @@ export function AllStoriesProvider({ children }) {
 	// 	storeStories();
 	// }, [stories]);
 
+	function addNodes(storyId, ...nodes) {
+		setStories((prevStories) =>
+			prevStories.map((story) => {
+				if (story.id !== storyId) return story;
+
+				return {
+					...story,
+					storyNodes: [...story.storyNodes, ...nodes],
+					timestamp_edited: Date.now(),
+					default: false, // TODO: delete the key instead of setting it to false
+				};
+			}),
+		);
+	}
+
+	function updateNode(storyId, nodeId, newNode) {
+		setStories(
+			stories.map((story) => {
+				if (story.id !== storyId) return story;
+
+				return {
+					...story,
+					storyNodes: [
+						...story.storyNodes.map((node) => {
+							if (node.id !== nodeId)
+								return {
+									...node,
+									start: newNode.start ? false : node.start,
+								};
+
+							const newValue = {
+								...node,
+								...newNode,
+							};
+
+							return newValue;
+						}),
+					],
+					timestamp_edited: Date.now(),
+					default: false, // TODO: delete the key instead of setting it to false
+				};
+			}),
+		);
+	}
+
+	function removeNode(storyId, nodeId) {
+		setStories(
+			stories.map((story) => {
+				if (story.id !== storyId) return story;
+
+				return {
+					...story,
+					storyNodes: story.storyNodes.filter((n) => n.id !== nodeId),
+					timestamp_edited: Date.now(),
+					default: false, // TODO: delete the key instead of setting it to false
+				};
+			}),
+		);
+	}
+
+	function addStory(story) {
+		setStories([...stories, story]);
+	}
+
+	function updateStory(storyId, story) {
+		setStories(
+			stories.map((s) => {
+				if (s.id === storyId) return { ...s, ...story };
+				return s;
+			}),
+		);
+	}
+
+	function removeStory(storyId) {
+		setStories((prev) => {
+			const newStories = prev.filter((s) => {
+				if (s.id !== storyId) return s;
+			});
+
+			if (storyId === currentStoryId) setCurrentStoryId(newStories[0].id);
+
+			return newStories;
+		});
+	}
+
+	const getCurrentStory = useCallback(() => {
+		return stories.find((story) => story.id === currentStoryId);
+	}, [stories, currentStoryId]);
+
+	function getCurrentStoryNodes() {
+		return getCurrentStory().storyNodes;
+	}
+
 	return (
 		<StoryContext.Provider
 			value={{
 				stories,
-				setStories,
+				addNodes,
+				updateNode,
+				removeNode,
+				addStory,
+				updateStory,
+				removeStory,
 				currentStoryId,
 				setCurrentStoryId,
+				getCurrentStory,
+				getCurrentStoryNodes,
 			}}
 		>
 			{children}

@@ -9,11 +9,9 @@ import DeleteNodeConfirmationModal from "./modals/DeleteNodeConfirmationModal";
 import EditNodeModal from "./modals/EditNodeModal";
 
 export default function StoryNodeListItem({ node }) {
-	const { stories, currentStoryId } = useContext(StoryContext);
+	const { getCurrentStoryNodes } = useContext(StoryContext);
 
-	const currentStoryNodes = stories.find(
-		(story) => story.id === currentStoryId,
-	).storyNodes;
+	const currentStoryNodes = getCurrentStoryNodes();
 
 	const [isEditNodeModalVisible, setIsEditNodeModalVisible] = useState(false);
 	const [isDeleteNodeModalVisible, setIsDeleteNodeModalVisible] = useState(false);

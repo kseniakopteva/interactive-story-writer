@@ -11,7 +11,7 @@ export default function AddStoryModal({ addStoryModalVisible, setAddStoryModalVi
 	const [titleInput, setTitleInput] = useState("");
 	const [descriptionInput, setDescriptionInput] = useState("");
 
-	const { setStories, setCurrentStoryId } = useContext(StoryContext);
+	const { addStory, setCurrentStoryId } = useContext(StoryContext);
 
 	const [errors, setErrors] = useState({ title: "", description: "" });
 
@@ -32,9 +32,7 @@ export default function AddStoryModal({ addStoryModalVisible, setAddStoryModalVi
 			storyNodes: [],
 		};
 
-		setStories((prev) => {
-			return [...prev, newStory];
-		});
+		addStory(newStory)
 
 		setCurrentStoryId(newId);
 

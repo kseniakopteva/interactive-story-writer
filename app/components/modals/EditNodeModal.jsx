@@ -22,13 +22,12 @@ export default function EditNodeModal({
 		start: node.start,
 	};
 
-	const { stories, setStories, currentStoryId } = useContext(StoryContext);
+	const { currentStoryId, updateNode, addNodes, getCurrentStoryNodes } =
+		useContext(StoryContext);
 	const [input, setInput] = useState(INITIAL_INPUT);
 	const [errors, setErrors] = useState({ title: "" });
 
-	const currentStoryNodes = stories.find(
-		(story) => story.id === currentStoryId,
-	).storyNodes;
+	const currentStoryNodes = getCurrentStoryNodes();
 
 	// did user press the "set as start" button?
 	// used to display the "don't forget to save!" text
@@ -80,7 +79,7 @@ export default function EditNodeModal({
 		return true;
 	}
 
-	function updateNode(id) {
+	function updateNodeLocal(id) {
 		if (!validate()) return;
 
 		// reset
@@ -103,39 +102,17 @@ export default function EditNodeModal({
 			targetId: node.id,
 		}));
 		// end new links
-
-		setStories((prevStories) =>
-			prevStories.map((story) => {
-				if (story.id !== currentStoryId) return story;
-
-				return {
-					...story,
-					storyNodes: [
-						...story.storyNodes.map((node) => {
-							if (node.id !== id)
-								return {
-									...node,
-									start: input.start ? false : node.start,
-								};
-
-							return {
-								id: input.id,
-								title: input.title,
-								body: input.body?.split("\n").map((paragraph, index) => ({
-									id: index + 1,
-									text: paragraph,
-								})),
-								links: [...input.links, ...linksArray],
-								start: input.start,
-							};
-						}),
-						...linkedNodes,
-					],
-					timestamp_edited: Date.now(),
-					default: false, // TODO: delete the key instead of setting it to false
-				};
-			}),
-		);
+		
+		updateNode(currentStoryId, node.id, {
+			title: input.title,
+			body: input.body?.split("\n").map((paragraph, index) => ({
+				id: index + 1,
+				text: paragraph,
+			})),
+			links: [...input.links, ...linksArray],
+			start: input.start,
+		});
+		addNodes(currentStoryId, ...linkedNodes);
 
 		setIsEditNodeModalVisible(false);
 	}
@@ -182,9 +159,11 @@ export default function EditNodeModal({
 				value={input.title}
 				onChangeText={(text) => handleChange("title", text)}
 			/>
-			{errors.title !== ""? (
+			{errors.title !== "" ? (
 				<TextError style={{ marginVertical: 5 }}>{errors.title}</TextError>
-			): <></>}
+			) : (
+				<></>
+			)}
 			<H3 style={{ marginVertical: 5, marginTop: 10 }}>Body</H3>
 			<BasicTextarea
 				placeholder={"Body"}
@@ -319,7 +298,10 @@ export default function EditNodeModal({
 			<TextSubtle style={{ textAlign: "center", marginTop: 10 }}>
 				Dont forget to save your changes!
 			</TextSubtle>
-			<BasicButton onPress={() => updateNode(node.id)} style={{ marginTop: 10 }}>
+			<BasicButton
+				onPress={() => updateNodeLocal(node.id)}
+				style={{ marginTop: 10 }}
+			>
 				Save changes
 			</BasicButton>
 		</BasicModal>

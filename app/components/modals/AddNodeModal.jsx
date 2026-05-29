@@ -8,7 +8,7 @@ import BasicTextarea from "../base/BasicTextarea";
 import { H1, H2, TextError } from "../base/textComponents";
 
 export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisible }) {
-	const { setStories, currentStoryId } = useContext(StoryContext);
+	const { currentStoryId, addNodes } = useContext(StoryContext);
 
 	const [titleInput, setTitleInput] = useState("");
 	const [bodyInput, setBodyInput] = useState("");
@@ -67,19 +67,7 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 		};
 
 		// Add new node to the array
-		setStories((prevStories) =>
-			prevStories.map((story) => {
-				if (story.id !== currentStoryId) return story;
-
-				return {
-					...story,
-					storyNodes: [...story.storyNodes, newNode, ...linkedNodes],
-					timestamp_edited: Date.now(),
-					default: false // TODO: delete the key instead of setting it to false
-				};
-				
-			}),
-		);
+		addNodes(currentStoryId, newNode, ...linkedNodes);
 
 		// Close modal
 		setAddNodeModalVisible(false);
@@ -129,7 +117,9 @@ export default function AddNodeModal({ addNodeModalVisible, setAddNodeModalVisib
 				/>
 				{errors.title !== "" ? (
 					<TextError style={{ marginVertical: 5 }}>{errors.title}</TextError>
-				): <></>}
+				) : (
+					<></>
+				)}
 				<BasicTextarea
 					placeholder={"Body"}
 					value={bodyInput}
