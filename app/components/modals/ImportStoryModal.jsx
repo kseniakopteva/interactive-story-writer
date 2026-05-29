@@ -4,7 +4,6 @@ import BasicModal from "../base/BasicModal";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { useContext } from "react";
-import { Text } from "react-native";
 import BasicButton from "../base/BasicButton";
 import { H1, TextRegular } from "../base/textComponents";
 
@@ -29,9 +28,12 @@ export default function ImportStoryModal({
 
 			const fileContents = await FileSystem.readAsStringAsync(file.uri);
 
-			setStories(JSON.parse(fileContents));
-			setImportStoryModalVisible(false);
+			let newStory = JSON.parse(fileContents);
+			newStory.id = Date.now();
+			newStory.title = `${newStory.title} [imported]`;
+			setStories((prev) => [...prev, newStory]);
 
+			setImportStoryModalVisible(false);
 		} catch (error) {
 			console.error("Failed to pick/read file:", error);
 		}
@@ -45,7 +47,7 @@ export default function ImportStoryModal({
 			<H1 style={{ marginBottom: 10 }}>Import Story</H1>
 			<TextRegular>Here are the available options of import:</TextRegular>
 			<BasicButton onPress={importFromJSON} style={{ marginTop: 20 }}>
-				Import from JSON
+				Import from JSON Format (.txt)
 			</BasicButton>
 			<BasicButton onPress={() => {}} style={{ marginTop: 10 }} disabled={true}>
 				Import from ???

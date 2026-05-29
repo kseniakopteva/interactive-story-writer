@@ -21,12 +21,15 @@ export default function DeleteNodeConfirmationModal({
 			.join("\n").length || 0;
 
 	function removeStory() {
-		if (story.id === currentStoryId) setCurrentStoryId(stories[0].id);
-		setStories((prev) =>
-			prev.filter((s) => {
+		setStories((prev) => {
+			const newStories = prev.filter((s) => {
 				if (s.id !== story.id) return story;
-			}),
-		);
+			});
+
+			if (story.id === currentStoryId) setCurrentStoryId(newStories[0].id);
+
+			return newStories;
+		});
 	}
 
 	return (

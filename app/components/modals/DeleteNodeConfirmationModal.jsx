@@ -11,11 +11,11 @@ export default function DeleteNodeConfirmationModal({
 }) {
 	const { setStories, currentStoryId } = useContext(StoryContext);
 
-	const sumOfSymbols = node.body?.map((paragraph) => paragraph.text).join(`\n`).length;
+	const sumOfSymbols = node?.body?.map((paragraph) => paragraph.text).join(`\n`).length;
 
 	function removeNode() {
 		setStories((prevStories) =>
-			prevStories.map((story) => {
+			prevStories?.map((story) => {
 				if (story.id !== currentStoryId) return story;
 
 				return {

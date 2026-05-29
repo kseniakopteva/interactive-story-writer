@@ -137,8 +137,6 @@ export default function EditNodeModal({
 			}),
 		);
 
-		console.log(stories);
-
 		setIsEditNodeModalVisible(false);
 	}
 

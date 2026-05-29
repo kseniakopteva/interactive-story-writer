@@ -4,7 +4,6 @@ import BasicModal from "../base/BasicModal";
 
 import * as FileSystem from "expo-file-system/legacy";
 import { useContext } from "react";
-import { Text } from "react-native";
 import BasicButton from "../base/BasicButton";
 import { H1, TextRegular } from "../base/textComponents";
 
@@ -14,13 +13,11 @@ export default function ExportStoryModal({
 }) {
 	const { stories, currentStoryId } = useContext(StoryContext);
 
-	const currentStoryNodes = stories.find(
-		(story) => story.id === currentStoryId,
-	).storyNodes;
+	const currentStory = stories.find((story) => story.id === currentStoryId);
+	const currentStoryNodes = currentStory.storyNodes;
 
 	async function exportToTwee() {
-		// TODO: file name should be story's parsed title
-		const uri = FileSystem.documentDirectory + "myFile.txt";
+		const uri = getCurrentStoryUri();
 
 		await FileSystem.writeAsStringAsync(uri, parseCurrentStoryToTwee());
 
@@ -61,12 +58,11 @@ export default function ExportStoryModal({
 			fileText += "\n\n\n";
 		});
 
-		console.log(fileText);
 		return fileText;
 	}
 
 	async function exportToJSON() {
-		const uri = FileSystem.documentDirectory + "myFile.json";
+		const uri = getCurrentStoryUri();
 
 		await FileSystem.writeAsStringAsync(uri, parseCurrentStoryToJSON());
 
@@ -74,10 +70,19 @@ export default function ExportStoryModal({
 	}
 
 	function parseCurrentStoryToJSON() {
-		const fileText = JSON.stringify(stories);
+		const fileText = JSON.stringify(currentStory);
 		return fileText;
 	}
 
+	function getCurrentStoryUri() {
+		const parsedTitle = currentStory.title.replace(
+			/[ &\/\\#,+()$~%.'":*?<>{}]/g,
+			"_",
+		);
+		return `${FileSystem.documentDirectory}${parsedTitle}.txt`;
+	}
+
+	// TODO: add explanations for different types of export
 	return (
 		<BasicModal
 			isVisible={exportStoryModalVisible}
@@ -86,10 +91,10 @@ export default function ExportStoryModal({
 			<H1 style={{ marginBottom: 10 }}>Export Story</H1>
 			<TextRegular>Here are the available options of export:</TextRegular>
 			<BasicButton onPress={exportToTwee} style={{ marginTop: 20 }}>
-				Export to Twee Format
+				Export to Twee Format (.txt)
 			</BasicButton>
 			<BasicButton onPress={exportToJSON} style={{ marginTop: 10 }}>
-				Export as JSON
+				Export as JSON Format (.txt)
 			</BasicButton>
 			<BasicButton onPress={() => {}} style={{ marginTop: 10 }} disabled={true}>
 				Export to ???

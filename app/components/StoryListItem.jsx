@@ -44,45 +44,53 @@ export default function StoryListItem({ story }) {
 					<View style={{ flex: 1 }}>
 						<View
 							style={{
-								flexDirection: "row",
-								gap: 5,
-								justifyContent: "space-between",
+								flexDirection: "column",
 								alignItems: "flex-start",
 							}}
 						>
 							<View
 								style={{
-									flexDirection: "column",
+									flexDirection: "row",
+									gap: 5,
 									alignItems: "flex-start",
+									justifyContent: "space-between",
+									width: "100%",
 								}}
 							>
-								<H1 style={{ flexShrink: 1 }}>{story.title}</H1>
-								{story.default ? (
-									<TextBold
-										style={{
-											marginBottom: 5,
-											backgroundColor: colors.alert,
-											padding: 5,
-											borderRadius: 8,
-										}}
-									>
-										Default
-									</TextBold>
-								) : (
-									<></>
-								)}
-							</View>
-							<View style={{ flexDirection: "row", gap: 5 }}>
-								<BasicButton
-									type="secondary"
-									onPress={() => setIsDeleteStoryModalVisible(true)}
+								<H1 style={{ flexShrink: 1, wordBreak: "break-all" }}>
+									{story.title}
+								</H1>
+								<View
+									style={{
+										flexDirection: "row",
+										gap: 5,
+									}}
 								>
-									Remove
-								</BasicButton>
-								<BasicButton onPress={() => setEditStoryModal(true)}>
-									Edit Info
-								</BasicButton>
+									<BasicButton
+										type="secondary"
+										onPress={() => setIsDeleteStoryModalVisible(true)}
+									>
+										Remove
+									</BasicButton>
+									<BasicButton onPress={() => setEditStoryModal(true)}>
+										Edit Info
+									</BasicButton>
+								</View>
 							</View>
+							{story.default ? (
+								<TextBold
+									style={{
+										marginBottom: 5,
+										backgroundColor: colors.alert,
+										padding: 5,
+										borderRadius: 8,
+									}}
+								>
+									Default
+								</TextBold>
+							) : (
+								<></>
+							)}
 						</View>
 
 						{story.description ? (
@@ -93,7 +101,9 @@ export default function StoryListItem({ story }) {
 								<TextRegular>{story.description}</TextRegular>
 							</View>
 						) : (
-							<TextSubtle>No description...</TextSubtle>
+							<TextSubtle style={{ marginVertical: 5, marginTop: 10 }}>
+								No description...
+							</TextSubtle>
 						)}
 						<View style={{ marginTop: 10 }}>
 							<TextSubtle style={{ fontStyle: "italic" }}>
